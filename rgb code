@@ -1,0 +1,75 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import mode
+import os.path
+import pandas as pd
+
+num_folder = 8
+max_file_num = 30
+
+image_r = np.zeros([num_folder, max_file_num])
+image_g = np.zeros([num_folder, max_file_num])
+image_b = np.zeros([num_folder, max_file_num])
+
+for i in range(num_folder):
+    for j in range(max_file_num):
+        if i==0:
+            char = 'A'
+            k=0
+        elif i==1:
+            char = 'B'
+            k=1
+        elif i==2:
+            char = 'C'
+            k=2
+        elif i==3:
+            char = 'D'
+            k=3
+        elif i==4:
+            char = 'A'
+            k=4
+        elif i==5:
+            char = 'B'
+            k=5
+        elif i==6:
+            char = 'C'
+            k=6
+        elif i==7:
+            char = 'D'
+            k=7
+        file_name = 'RG_data/%d/%c%d_L.jpg'%(i+1, char, j+1)
+        print(file_name)
+
+        if os.path.isfile(file_name):
+            image_bgr = cv2.imread(file_name) # 이미지 로드
+            image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
+
+            # plt.imshow(image_rgb)
+            # plt.show()
+            # # print(image_rgb)
+
+            #Black threshold
+            RGB_low = (0, 0, 0)
+            #White threshold
+            RGB_high = (256, 256, 125)
+            mask = cv2.inRange(image_rgb, RGB_low, RGB_high) # 마스크를 만듬 
+            # plt.imshow(mask), plt.axis("off") # 이미지 출력
+            # plt.show()
+
+            image_rgb_masked = cv2.bitwise_and(image_rgb, image_rgb, mask=mask) # 이미지에 마스크를 적용
+
+            # plt.imshow(image_rgb_masked), plt.axis("off") # 이미지 출력
+            # plt.show()
+            
+            r = image_rgb_masked[:,:,0]
+            g = image_rgb_masked[:,:,1]
+            b = image_rgb_masked[:,:,2]
+            image_r[i,j]  = np.sum(np.sum(r))
+            image_g[i,j]  = np.sum(np.sum(g))
+            image_b[i,j]  = np.sum(np.sum(b))
+
+
+np.savetxt('image_r.csv', image_r, delimiter=",")
+np.savetxt('image_g.csv', image_g, delimiter=",")
+np.savetxt('image_b.csv', image_b, delimiter=",")
